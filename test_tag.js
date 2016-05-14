@@ -11,23 +11,35 @@ function guid() {
 
 // Assign UUID to variable
 var uuid = guid();
+var level = 0;
+var post_message = '';
 
 // Wait for message from parent window
 addEventListener('message', receiveMessage, false);
 
 // If message arrives from child, send back your uuid variable...
 function receiveMessage(event) {
-  if (event.data == 'you there brah?' && event.source !== window) {
-    document.getElementsByTagName('iframe')[0].contentWindow.postMessage(uuid, '*');
+  if(event.source == window) {return};
+  if (JSON.parse(event.data).event == 'check_for_parent') {
+    post_message = {
+      'event':'send_uuid',
+      'uuid':uuid,
+      'level':level
+    };
+    document.getElementsByTagName('iframe')[0].contentWindow.postMessage(JSON.stringify(post_message), '*');
     console.log('Received by: ' + page);
     console.log('Sent: ' + uuid)
   // ...but if message arrives from parent, overwrite your uuid variable with theirs
-  } else if (event.source !== window) {
-    uuid = event.data;
-    console.log('Received: ' + uuid);
+  } else if (JSON.parse(event.data).event == 'send_uuid') {
+    uuid = JSON.parse(event.data).uuid;
+    level = JSON.parse(event.data).level + 1;
+    console.log('Received: ' + uuid + '. I am level ' + level + '.');
   }
 }
 
 // Send ping to parent
-parent.postMessage('you there brah?', '*');
+post_message = {
+  'event':'check_for_parent'
+};
+parent.postMessage(JSON.stringify(post_message), '*');
 console.log('Sent from: ' + page);
