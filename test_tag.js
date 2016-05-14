@@ -59,12 +59,3 @@ function receiveMessage(event) {
 }
 
 getUuidFromParent();
-
-// Check if current document has a child iframe
-function hasChild(current_doc) {
-  if(typeof current_doc.getElementsByTagName('iframe')[0] != 'undefined') {
-    return true;
-  } else {
-    return false;
-  }
-}
